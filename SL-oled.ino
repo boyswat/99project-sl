@@ -61,8 +61,8 @@ int c2;
 int c3; 
 int c4; 
 int c5; 
-int brightval;      //7-seg brightness 
-int dimval;         //7-seg dim brightness
+//int brightval;      //7-seg brightness 
+//int dimval;         //7-seg dim brightness
 int sb;             //strip brightness
 int dimsb;          // strip dim brightness
 boolean dimmer = false;
@@ -95,11 +95,11 @@ int cal;
 int prev_cal;
 
 // COLOR VARIABLES - for use w/ the strips and translated into 255 RGB colors 
-uint32_t color1; 
-uint32_t color2; 
-uint32_t color3; 
-uint32_t flclr1; 
-uint32_t flclr2; 
+long color1; 
+long color2; 
+long color3; 
+long flclr1; 
+long flclr2; 
 
 //Creates a 32 wide table for our pixel animations
 int rpmtable[32][3];
@@ -206,11 +206,11 @@ delay(10);
 flclr2 = load_color(c5); 
 delay(10); 
 
-        if (digitalRead(dimPin) == dimmerlogic){
+ //       if (digitalRead(dimPin) == dimmerlogic){
           ////display.setBrightness(dimval); 
-         }else{
+ //        }else{
           ////display.setBrightness(brightval);         
-         }
+ //        }
 ////display.setColon(false);         
   oled.begin(&Adafruit128x64, OLED_CS, OLED_DC, OLED_CLK, OLED_DATA);
   oled.clear();
@@ -354,22 +354,7 @@ if (rpm < shift_rpm){
   if (digitalRead(button_pin) == LOW){ 
     delay(250); 
     clearStrip(); 
-  
-  //Ascend strip 
-  for (int i=0; i<(NUMPIXELS/2)+1; i++){ 
-    strip.setPixelColor(i, strip.Color(0, 0, 25)); 
-    strip.setPixelColor(NUMPIXELS-i, strip.Color(0, 0, 25)); 
-    strip.show(); 
-    delay(35); 
-  } 
-  // Descend Strip 
-  for (int i=0; i<(NUMPIXELS/2)+1; i++){ 
-    strip.setPixelColor(i, strip.Color(0, 0, 0)); 
-    strip.setPixelColor(NUMPIXELS-i, strip.Color(0, 0, 0)); 
-    strip.show(); 
-    delay(35); 
-  } 
-  oled.clear();
+   oled.clear();
   entermenu();
   menuvar=1; 
   menu(); 
@@ -590,11 +575,14 @@ if(DEBUG){
 
 if(DEBUG){
   for (i = 0; i<NUMPIXELS; i++){
+//    Serial.print(rpmtable[i][0]);
+//    Serial.print("  ");
+//    Serial.print(rpmtable[i][1]);
+//    Serial.print("  ");
+//    Serial.println(rpmtable[i][2]);  
     Serial.print(rpmtable[i][0]);
     Serial.print("  ");
-    Serial.print(rpmtable[i][1]);
-    Serial.print("  ");
-    Serial.println(rpmtable[i][2]);  
+    Serial.println(rpmtable[i][1]);
   }
 }
 }
@@ -682,11 +670,7 @@ while (menuvar == 1){
               sb--;
               testbright = false;
             } 
-
-            brightval  = map(sb,1,15,15,8);          
-            brightval = constrain (brightval, 8, 15); 
             sb = constrain(sb, 1, 15); 
-           // Serial.println(brightval);
       
             if (prev_variable != sb){
                   prev_variable = sb;
@@ -743,8 +727,8 @@ while (menuvar == 1){
               testbright = false;
             } 
 
-            dimval  = map(dimsb,1,15,15,8);          
-            dimval = constrain (dimval, 8, 15); 
+//            dimval  = map(dimsb,1,15,15,8);          
+//            dimval = constrain (dimval, 8, 15); 
             dimsb = constrain(dimsb, 1, 15); 
             //Serial.println(dimval);
       
@@ -926,77 +910,8 @@ while (menuvar == 1){
             }    
           break;
       
-      
-           case 5:  //RPM SENSE MODE
-           if (menu_enter == 0){
-              oled.setCursor(30, 0); 
-              oled.print(F("RPM Sense Mode"));
-              oled.setCursor(0, 2);              
-              oled.print(F("Select INTR or FR"));
-              oled.setCursor(0, 4);              
-              oled.print(F("INTR using hardware"));
-              oled.setCursor(0, 6);              
-              oled.print(F("FR using software."));
-              prev_variable = -1;
-            }
-      
-            
-            while (menu_enter == 1){         
-              int coloradjust1 = rotary_process();         
-              if (coloradjust1 == -128){senseoption--;}           
-              if (coloradjust1 == 64){senseoption++;}                   
-              senseoption = constrain(senseoption, 1, 2); 
-      
-      
-              if (prev_variable != senseoption) {
-                   prev_variable = senseoption;
-              switch (senseoption){
-                case 1:
-                    oled.clear();
-                  oled.set1X(); 
-                  oled.setFont(utf8font10x16);
-                  oled.setCursor(30, 0); 
-                  oled.print(F("Sense:"));
-                  oled.set2X();                   
-                  oled.setFont(utf8font10x16);
-                  oled.setCursor(0, 2);
-                  oled.clearToEOL();
-                  oled.print(F("INTR"));  
-                break;
-      
-                case 2:
-      
-                    oled.clear();
-                  oled.set1X(); 
-                  oled.setFont(utf8font10x16);
-                  oled.setCursor(30, 0); 
-                  oled.print(F("Sense: "));
-                  oled.set2X();                   
-                  oled.setFont(utf8font10x16);
-                  oled.setCursor(0, 2);
-                  oled.clearToEOL();
-                  oled.print(F("FR"));
-                break;   
-              }
-      
-              }     
-                 
-              if (digitalRead(button_pin) == LOW){ 
-                delay(250); 
-                menu_enter = 2;
-                prev_variable = 0;
-                clearStrip(); 
-                strip.show(); 
-             exitmenu();
-             delay(1000);
-             writeEEPROM(); 
-             resetFunc();
-              } 
-            }    
-           break;
-      
-      
-           case 6:  //SMOOTHING (conditioning)
+
+           case 5:  //SMOOTHING (conditioning)
             if (menu_enter == 0){
               oled.setCursor(30, 0); 
               oled.print(F("SMOOTHING"));
@@ -1054,7 +969,7 @@ while (menuvar == 1){
            break;
       
       
-       case 7:  // PULSES PER REVOLUTION
+       case 6:  // PULSES PER REVOLUTION
             if (menu_enter == 0){
             oled.setCursor(0, 0); 
             oled.print(F("PULSES PER ROTATION"));
@@ -1131,7 +1046,7 @@ while (menuvar == 1){
            break;
       
      
-           case 8:  // NUMBER OF LEDS
+           case 7:  // NUMBER OF LEDS
            if (menu_enter == 0){
                 oled.setCursor(20, 0); 
                 oled.print(F("NUMBER OF LEDS"));
@@ -1197,7 +1112,7 @@ while (menuvar == 1){
            break;    
           
        
-           case 9:  // Color Segmentation   
+           case 8:  // Color Segmentation   
       
             if (menu_enter == 0){
             oled.setCursor(0, 0);
@@ -1227,7 +1142,7 @@ while (menuvar == 1){
       break;    
       
       
-           case 10:  // PIXEL ANIMATION MODE
+           case 9:  // PIXEL ANIMATION MODE
             if (menu_enter == 0){
             oled.setCursor(0, 0);
             oled.print(F("ANIMATION MODE"));
@@ -1319,7 +1234,7 @@ while (menuvar == 1){
       
               
           
-          case 11: //Adjust Color #1 
+          case 10: //Adjust Color #1 
             oled.setCursor(0, 0);
             oled.print(F("SET COLOR 1"));
             oled.setCursor(0, 2);         
@@ -1355,7 +1270,7 @@ while (menuvar == 1){
              
           
           
-          case 12: //Adjust Color #2 
+          case 11: //Adjust Color #2 
       
             oled.setCursor(0, 0);
             oled.print(F("SET COLOR 2"));
@@ -1392,7 +1307,7 @@ while (menuvar == 1){
             }    
           break; 
           
-          case 13: //Adjust Color #3 
+          case 12: //Adjust Color #3 
             oled.setCursor(0, 0);
             oled.print(F("SET COLOR 3"));
             oled.setCursor(0, 2);          
@@ -1427,7 +1342,7 @@ while (menuvar == 1){
             }    
           break; 
           
-          case 14: //Adjust Color #4 
+          case 13: //Adjust Color #4 
             oled.setCursor(0, 0);
             oled.print(F("SHIFT COLOR"));
             oled.setCursor(0, 2);          
@@ -1462,7 +1377,7 @@ while (menuvar == 1){
             }    
           break; 
                    
-          case 15:   //DEBUG MODE
+          case 14:   //DEBUG MODE
           
             oled.setCursor(0, 0);
             oled.print(F("DEBUG MODE"));
@@ -1505,7 +1420,7 @@ while (menuvar == 1){
           break;
       
       
-          case 16:   //RESET
+          case 15:   //RESET
       
             oled.setCursor(0, 0);   
             oled.print(F("SYSTEM RESET"));
@@ -1583,7 +1498,7 @@ while (menuvar == 1){
 
 //This subroutine reads the stored variables from memory 
 void getEEPROM(){ 
-brightval = EEPROM.read(0); 
+//brightval = EEPROM.read(0); 
 sb = EEPROM.read(1); 
 c1 = EEPROM.read(2); 
 c2 = EEPROM.read(3); 
@@ -1612,7 +1527,7 @@ activation_rpm2 = EEPROM.read(25);
 activation_rpm3 = EEPROM.read(26); 
 activation_rpm4 = EEPROM.read(27); 
 cal = EEPROM.read(28);
-dimval = EEPROM.read(29);
+//dimval = EEPROM.read(29);
 dimsb = EEPROM.read(30);
 dimmerlogic = EEPROM.read(31);
 
@@ -1641,7 +1556,7 @@ byte activation_three = ((activation_rpm >> 8) & 0xFF);
 byte activation_two = ((activation_rpm >> 16) & 0xFF);
 byte activation_one = ((activation_rpm >> 24) & 0xFF);
 
-EEPROM.write(0, brightval); 
+//EEPROM.write(0, brightval); 
 EEPROM.write(1, sb); 
 EEPROM.write(2, c1); 
 EEPROM.write(3, c2); 
@@ -1670,7 +1585,7 @@ EEPROM.write(25, activation_three);
 EEPROM.write(26, activation_two); 
 EEPROM.write(27, activation_one); 
 EEPROM.write(28, cal);
-EEPROM.write(29, dimval);
+//EEPROM.write(29, dimval);
 EEPROM.write(30, dimsb);
 EEPROM.write(31, dimmerlogic);
 } 
@@ -1769,8 +1684,8 @@ void testlights(int color){
 void check_first_run(){
   if (shift_rpm == 0){
      Serial.println("FIRST RUN! LOADING DEFAULTS");  
-      brightval = 15; 
-      dimval = 8;
+      //brightval = 15; 
+      //dimval = 8;
       dimsb = 15;
       dimmerlogic = false;
       sb = 3; 
@@ -1780,10 +1695,10 @@ void check_first_run(){
       c4 = 255; 
       c5 = 0; 
       
-      activation_rpm = 1000; 
-      shift_rpm = 6000;
+      activation_rpm = 2000; 
+      shift_rpm = 7000;
       pixelanim  = 1; 
-      senseoption  = 2;
+      senseoption  = 1;
       smoothing = 1; 
       NUMPIXELS = 16;
       //rpmscaler = EEPROM.read(12);  
@@ -1801,8 +1716,15 @@ void check_first_run(){
 }
 
 
+
+
+
+
 void build_segments(){
 
+if (pixelanim == 3){seg_mover = NUMPIXELS-1;}
+  
+while (current_seg_number<4){
               oled.setCursor(0, 0);
               oled.print(F("COLOR SEGMENTS"));
               oled.setCursor(0, 2);   
@@ -1813,134 +1735,199 @@ void build_segments(){
               oled.setCursor(0, 6); 
               oled.print(F("Press when done."));
 
-// Resets segmentation variables, sets segments 2 and 4 outside of the range
-   int prev_seg_mover = -1;
-   current_seg_number = 1;
-   seg1_start = 0;
-   seg1_end = 0;
-   seg2_end = NUMPIXELS + 1;
-   seg3_end = NUMPIXELS + 1;
-
-// Based on the animation, we must reconfigure some segmentation variables to known limits  
-    switch(pixelanim){
-      case 1:
-       seg_mover = 0; 
-      break;
-    
-      case 2:
-       seg1_start = (NUMPIXELS / 2);
-       seg_mover = (NUMPIXELS / 2);
-      break;
-    
-      case 3:
-        seg_mover = NUMPIXELS-1;
-        seg1_end = NUMPIXELS-1;
-        seg2_end = 0;
-        seg3_end = 0;    
-      break;
-    
-      case 4:
-        seg_mover = 0;
-        if (((NUMPIXELS-1)%2)> 0){
-          seg2_end = (NUMPIXELS/2)-1;
-        } else {
-          seg2_end = NUMPIXELS/2;
-        };        
-        if (((NUMPIXELS-1)%2)> 0){
-          seg3_end = (NUMPIXELS/2)-1;
-        } else {
-          seg3_end = NUMPIXELS/2;
-        };
-      break;
-    }
+      int coloradjust1 = rotary_process();         
+        if (coloradjust1 == -128){seg_mover--;} 
+        if (coloradjust1 == 64){seg_mover++;}    
   
-  
-    while (current_seg_number<3){
-      int colorsegmenter = rotary_process();         
-      if (colorsegmenter == -128){seg_mover--;} 
-      if (colorsegmenter == 64){seg_mover++;}    
-  
-      switch(pixelanim){
-        case 1:
-          switch (current_seg_number){
-            case 1:
-              seg_mover = constrain(seg_mover,0,NUMPIXELS-1);
-            break;
-            case 2:
-              seg_mover = constrain(seg_mover,seg1_end+1,NUMPIXELS-1); 
-            break;        
-          }
-    
-        break;
-      
-        case 2:
-          switch (current_seg_number){
-            case 1:
-               seg_mover = constrain(seg_mover,NUMPIXELS/2,NUMPIXELS-1);
-            break;
-            case 2:
-               seg_mover = constrain(seg_mover,seg1_end+1,NUMPIXELS-1);
-            break;        
-          } 
-        break;
-      
-        case 3:
-          switch (current_seg_number){
-            case 1:
-              seg_mover = constrain(seg_mover,0,NUMPIXELS-1);
-            break;
-            case 2: 
-              seg_mover = constrain(seg_mover,0,seg1_end-1); 
-            break;        
-          }
-      
-        break;
-      
-        case 4:
-          switch (current_seg_number){
-            case 1:
-              if (((NUMPIXELS-1)%2)> 0){
-                seg_mover = constrain(seg_mover,0,(NUMPIXELS/2)-2);
-              }else{
-                seg_mover = constrain(seg_mover,0,(NUMPIXELS/2)-1);
-              }
-            break;
-            case 2:
-              if (((NUMPIXELS-1)%2)> 0){
-                seg_mover = constrain(seg_mover,seg1_end+1,(NUMPIXELS/2)-1);
-              }else{
-                seg_mover = constrain(seg_mover,seg1_end+1,NUMPIXELS/2);
-              }
-            break;        
-          } 
-        break;
-      }
-      
-      
       if (digitalRead(button_pin) == LOW){ 
           delay(250);
           current_seg_number++;     
-      }
-  
-  
-   if (prev_seg_mover != seg_mover){  
-         prev_seg_mover = seg_mover;
-                    
-        switch(current_seg_number){
-            case 1:
-              seg1_end = seg_mover;
-            break;
+        } 
+              
+  switch(current_seg_number){
+      case 1:        
+         if (pixelanim == 1){  
+             seg_mover = constrain(seg_mover, 0, (NUMPIXELS-1));
+             seg1_end = seg_mover;     
+             strip.setPixelColor(seg1_end, color1); 
+             for (int x = seg1_end+1; x<NUMPIXELS; x++){
+               strip.setPixelColor(x, strip.Color(0, 0, 0));
+             } 
+         } else if (pixelanim == 3){  
+             seg_mover = constrain(seg_mover, 0, (NUMPIXELS-1));
+             seg1_start = seg_mover;     
+             strip.setPixelColor(seg1_start, color1); 
+             for (int x = seg1_start-1; x>-1; x--){
+               strip.setPixelColor(x, strip.Color(0, 0, 0));
+             }
+         } else if (pixelanim == 2) {
+             seg1_start = ((NUMPIXELS-1)/2);
+              if (((NUMPIXELS-1)%2)> 0){seg1_start=seg1_start+1;}
+             seg_mover = constrain(seg_mover, seg1_start, (NUMPIXELS-1));
+             seg1_end = seg_mover; 
+
+              for (int x = seg1_start; x<seg1_end+1; x++){
+                  strip.setPixelColor(x, color1);
+                }
+              for (int x = seg1_end+1; x<(NUMPIXELS); x++){
+                  strip.setPixelColor(x, strip.Color(0, 0, 0));
+                }
+
+              if (((NUMPIXELS-1)%2)> 0){
+                  for (int x = seg1_start-1; x>seg1_start-(seg1_end-seg1_start)-2; x--){
+                     strip.setPixelColor(x, color1);
+                  }
+                  for (int x = seg1_start-(seg1_end-seg1_start)-2; x>-1; x--){
+                     strip.setPixelColor(x, strip.Color(0, 0, 0));
+                  }
+                if(DEBUG){
+                Serial.println("MoDULo");
+                }
+              } else {
+                  for (int x = seg1_start; x>seg1_start-(seg1_end-seg1_start)-1; x--){
+                     strip.setPixelColor(x, color1);
+                  }
+                  for (int x = seg1_start-(seg1_end-seg1_start)-1; x>-1; x--){
+                     strip.setPixelColor(x, strip.Color(0, 0, 0));
+                  }         
+              }
+         }
+       if(DEBUG){
+           Serial.print("S1end: ");
+           Serial.println(seg1_end);
+           Serial.print("S1start: ");
+           Serial.println(seg1_start);
+       }
+         
+         strip.show();
+ 
+     
+      break;
+
+
+
+      case 2:           
+         if (pixelanim == 1){       
+             seg_mover = constrain(seg_mover, seg1_end+1, (NUMPIXELS-1));
+             seg2_end = seg_mover;
+             strip.setPixelColor(seg2_end, color2); 
+             for (int x = seg2_end+1; x<strip.numPixels(); x++){
+               strip.setPixelColor(x, strip.Color(0, 0, 0));
+             }
+         } else if (pixelanim == 3){  
+             seg_mover = constrain(seg_mover, 0, (seg1_start-1));
+             seg2_start = seg_mover;     
+             strip.setPixelColor(seg2_start, color2); 
+             for (int x = seg2_start-1; x>-1; x--){
+               strip.setPixelColor(x, strip.Color(0, 0, 0));
+             }
+         } else if (pixelanim == 2) {
+             //seg1_start = ((NUMPIXELS-1)/2);
+             seg2_start = seg1_end + 1;
+            //  if (((NUMPIXELS-1)%2)> 0){seg1_start=seg1_start+1;}
+             seg_mover = constrain(seg_mover, seg2_start, (NUMPIXELS-1));
+             seg2_end = seg_mover; 
+
+              for (int x = seg2_start; x<seg2_end+1; x++){
+                  strip.setPixelColor(x, color2);
+                }
+              for (int x = seg2_end+1; x<(NUMPIXELS); x++){
+                  strip.setPixelColor(x, strip.Color(0, 0, 0));
+                }
+
+              if (((NUMPIXELS-1)%2)> 0){
+                  for (int x = seg1_start-(seg1_end-seg1_start)-2; x>seg1_start-(seg2_end-seg1_start)-2; x--){
+                     strip.setPixelColor(x, color2);
+                  }
+                  for (int x = seg1_start-(seg2_end-seg1_start)-2; x>-1; x--){
+                     strip.setPixelColor(x, strip.Color(0, 0, 0));
+                  }
+                  if(DEBUG){Serial.println("MoDULo");
+                  }
+              } else {
+                  for (int x = seg1_start-(seg1_end-seg1_start)-1; x>seg1_start-(seg2_end-seg1_start)-1; x--){
+                     strip.setPixelColor(x, color2);
+                  }
+                  for (int x = seg1_start-(seg2_end-seg1_start)-1; x>-1; x--){
+                     strip.setPixelColor(x, strip.Color(0, 0, 0));
+                  }         
+              }
+              
+         }
+
+          if(DEBUG){
+           Serial.print("S2end: ");
+           Serial.println(seg2_end);
+           Serial.print("S2start: ");
+           Serial.println(seg2_start);
+          }
+
+      strip.show();   
+      break;
+
+      case 3:
       
-            case 2:
-              seg2_end = seg_mover;   
-            break; 
-      
-        }
-        buildarrays();
-        loadallcolors();
-        testlights(4);             
-      }
+         if (pixelanim == 1){        
+             seg_mover = constrain(seg_mover, seg2_end+1, (strip.numPixels()-1));
+             seg3_end = seg_mover;
+            // seg3_start = seg2_end +1;
+             strip.setPixelColor(seg3_end, color3); 
+             for (int x = seg3_end+1; x<strip.numPixels(); x++){
+               strip.setPixelColor(x, strip.Color(0, 0, 0));
+             }
+         } else if (pixelanim == 3){  
+             seg_mover = constrain(seg_mover, 0, (seg2_start-1));
+             seg3_start = seg_mover;     
+             strip.setPixelColor(seg3_start, color3); 
+             for (int x = seg3_start-1; x>-1; x--){
+               strip.setPixelColor(x, strip.Color(0, 0, 0));
+             }
+         } else if (pixelanim == 2) {             
+             seg3_start = seg2_end + 1;            
+             seg_mover = constrain(seg_mover, seg3_start, (NUMPIXELS-1));
+             seg3_end = seg_mover; 
+
+              for (int x = seg3_start; x<seg3_end+1; x++){
+                  strip.setPixelColor(x, color3);
+                }
+              for (int x = seg3_end+1; x<(NUMPIXELS); x++){
+                  strip.setPixelColor(x, strip.Color(0, 0, 0));
+                }
+
+              if (((NUMPIXELS-1)%2)> 0){
+                  for (int x = seg1_start-(seg2_end-seg1_start)-2; x>seg1_start-(seg3_end-seg1_start)-2; x--){
+                     strip.setPixelColor(x, color3);
+                  }
+                  for (int x = seg1_start-(seg3_end-seg1_start)-2; x>-1; x--){
+                     strip.setPixelColor(x, strip.Color(0, 0, 0));
+                  }
+                if(DEBUG){
+                Serial.println("MoDULo");
+                }
+              } else {
+                  for (int x = seg1_start-(seg2_end-seg1_start)-1; x>seg1_start-(seg3_end-seg1_start)-1; x--){
+                     strip.setPixelColor(x, color3);
+                  }
+                  for (int x = seg1_start-(seg3_end-seg1_start)-1; x>-1; x--){
+                     strip.setPixelColor(x, strip.Color(0, 0, 0));
+                  }         
+              }          
+         }
+
+          if(DEBUG){
+           Serial.print("S3end: ");
+           Serial.println(seg3_end);
+           Serial.print("S3start: ");
+           Serial.println(seg3_start);
+          }
+      strip.show();
+      break;
+
+
+
+
    }
+  }
 }
 
 
@@ -2003,6 +1990,5 @@ void bootanimation(){
   clearStrip();
   strip.show();
 }
-
 
 
