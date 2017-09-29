@@ -369,23 +369,21 @@ int ya; // second starting point pixel address (for middle-out animation only)
 int i;  //temporary for loop variable
 
 if(DEBUG){
- Serial.println("PIXELANIM   ");
+  Serial.print("NUMPIXELS:  ");
+ Serial.println(NUMPIXELS);
+ Serial.print("PIXELANIM:  ");
  Serial.println(pixelanim);
- Serial.println("  Start1 ");
+ Serial.print("Start1: ");
  Serial.println(seg1_start);
- Serial.println("  End1 ");
+ Serial.print("End1: ");
  Serial.println(seg1_end);
- Serial.println("  Start2 ");
- Serial.println(seg2_start);
- Serial.println("  End2 ");
+ Serial.print("End2: ");
  Serial.println(seg2_end);
- Serial.println("Start3 ");
- Serial.println(seg3_start);
- Serial.println("  End3 ");
+ Serial.print("End3: ");
  Serial.println(seg3_end);
- Serial.println("  Activation RPM ");
+ Serial.print("  Activation RPM ");
  Serial.println(activation_rpm);
- Serial.println("  SHIFT RPM ");
+ Serial.print("  SHIFT RPM ");
  Serial.println(shift_rpm);
 }
 
@@ -413,16 +411,18 @@ if(DEBUG){
      if (((NUMPIXELS-1)%2)> 0){    
          x = ((shift_rpm - activation_rpm)/(NUMPIXELS/2));  //EVEN PIXELS
      }else{
-       x = ((shift_rpm - activation_rpm)/((NUMPIXELS/2)+1));   //ODD PIXELS       
+         x = ((shift_rpm - activation_rpm)/((NUMPIXELS/2)+1));   //ODD PIXELS       
      }
      
 
-    ya = 0;   // SEGMENT 1
+     ya = 0;   // SEGMENT 1
      for (i = seg1_start; i<seg1_end+1; i++){      
         rpmtable[i][0] = activation_rpm + (ya*x);
         rpmtable[i][1] = 1;
         ya++;
-      }     
+      }
+
+          
          if (((NUMPIXELS-1)%2)> 0){
           ya = 0;
            for (i = seg1_start-1; i>seg1_start-(seg1_end-seg1_start)-2; i--){
@@ -439,22 +439,24 @@ if(DEBUG){
             }
          }
 
-      if (seg2_start == seg2_end){
+
+
+      if ((seg1_end+1) == seg2_end){
         ya =  seg2_end - seg1_start;  //SEGMENT 2
       } else {
-        ya =  seg2_start - seg1_start;  
+        ya =  (seg1_end+1) - seg1_start;  
       }
       
-     for (i = seg2_start; i<seg2_end+1; i++){
+     for (i = (seg1_end+1); i<seg2_end+1; i++){
         rpmtable[i][0] = activation_rpm + (ya*x);
         rpmtable[i][1] = 2;
         ya++;
       }
       
-      if (seg2_start == seg2_end){
+      if ((seg1_end+1) == seg2_end){
         ya =  seg2_end - seg1_start;  //SEGMENT 2
       } else {
-        ya =  seg2_start - seg1_start;  
+        ya =  (seg1_end+1) - seg1_start;  
       }
       
          if (((NUMPIXELS-1)%2)> 0){
@@ -471,23 +473,23 @@ if(DEBUG){
              }
            }
            
-      if (seg3_start == seg3_end){
+      if ((seg2_end+1) == seg3_end){
          ya =  seg3_end - seg1_start;    //SEGMENT 3
       } else {
-         ya =  seg3_start - seg1_start;    //SEGMENT 3  
+         ya =  (seg2_end+1) - seg1_start;    //SEGMENT 3  
       }
       
       
-     for (i = seg3_start; i<seg3_end+1; i++){
+     for (i = (seg2_end+1); i<seg3_end+1; i++){
         rpmtable[i][0] = activation_rpm + (ya*x);
         rpmtable[i][1] = 3;
         ya++;
       }
 
-      if (seg3_start == seg3_end){
+      if ((seg2_end+1) == seg3_end){
          ya =  seg3_end - seg1_start;   
       } else {
-         ya =  seg3_start - seg1_start;     
+         ya =  (seg2_end+1) - seg1_start;     
       }
       
       if (((NUMPIXELS-1)%2)> 0){
@@ -508,23 +510,24 @@ if(DEBUG){
   case 3:        
         y=0;
         x = ((shift_rpm - activation_rpm)/NUMPIXELS);
-        for (i = NUMPIXELS-1; i>seg1_start-1; i--){
+        for (i = NUMPIXELS-1; i>seg1_end-1; i--){
           rpmtable[i][0] = activation_rpm + (y*x);
           rpmtable[i][1] = 1;
           y++;
         }
-         for (i = seg1_start-1; i>seg2_start-1; i--){
+         for (i = seg1_end-1; i>seg2_end-1; i--){
           rpmtable[i][0] = activation_rpm + (y*x);
           rpmtable[i][1] = 2;
           y++;
         }
-        for (i = seg2_start-1; i>seg3_start-1; i--){
+        for (i = seg2_end-1; i>seg3_end-1; i--){
           rpmtable[i][0] = activation_rpm + (y*x);
           rpmtable[i][1] = 3;
           y++;
         }
       break;
-      case 4:                                           
+
+case 4:                                           
      if (((NUMPIXELS-1)%2)> 0){    
          x = ((shift_rpm - activation_rpm)/(NUMPIXELS/2));  //EVEN PIXELS
      }else{
@@ -550,6 +553,8 @@ if(DEBUG){
         rpmtable[i][0] = activation_rpm + (i*x);
         rpmtable[i][1] = 2;
       }
+      
+
       ya = seg1_end+1; 
       for (i = NUMPIXELS-(seg1_end)-2; i>NUMPIXELS-seg2_end-2; i--){
            rpmtable[i][0] = activation_rpm + (ya*x);
@@ -571,6 +576,7 @@ if(DEBUG){
           }
 
     break;
+   
   }
 
 if(DEBUG){
@@ -1700,7 +1706,7 @@ void check_first_run(){
       pixelanim  = 1; 
       senseoption  = 1;
       smoothing = 1; 
-      NUMPIXELS = 16;
+      NUMPIXELS = 8;
       //rpmscaler = EEPROM.read(12);  
       DEBUG = 0; 
       seg1_start = 0; 
@@ -1709,7 +1715,7 @@ void check_first_run(){
       seg2_end = 5; 
       seg3_start = 0; 
       seg3_end = 7;
-      cal = 30;
+      cal = 10;
       writeEEPROM();
       resetFunc();
   }  
@@ -1722,9 +1728,6 @@ void check_first_run(){
 
 void build_segments(){
 
-if (pixelanim == 3){seg_mover = NUMPIXELS-1;}
-  
-while (current_seg_number<4){
               oled.setCursor(0, 0);
               oled.print(F("COLOR SEGMENTS"));
               oled.setCursor(0, 2);   
@@ -1735,200 +1738,136 @@ while (current_seg_number<4){
               oled.setCursor(0, 6); 
               oled.print(F("Press when done."));
 
-      int coloradjust1 = rotary_process();         
-        if (coloradjust1 == -128){seg_mover--;} 
-        if (coloradjust1 == 64){seg_mover++;}    
+// Resets segmentation variables, sets segments 2 and 4 outside of the range
+   int prev_seg_mover = -1;
+   current_seg_number = 1;
+   seg1_start = 0;
+   seg1_end = 0;
+   seg2_end = NUMPIXELS + 1;
+   seg3_end = NUMPIXELS + 1;
+
+// Based on the animation, we must reconfigure some segmentation variables to known limits  
+    switch(pixelanim){
+      case 1:
+       seg_mover = 0; 
+      break;
+    
+      case 2:
+       seg1_start = (NUMPIXELS / 2);
+       seg_mover = (NUMPIXELS / 2);
+      break;
+    
+      case 3:
+        seg_mover = NUMPIXELS-1;
+        seg1_end = NUMPIXELS-1;
+        seg2_end = 0;
+        seg3_end = 0;    
+      break;
+    
+      case 4:
+        seg_mover = 0;
+        if (((NUMPIXELS-1)%2)> 0){
+          seg2_end = (NUMPIXELS/2)-1;
+        } else {
+          seg2_end = NUMPIXELS/2;
+        };        
+        if (((NUMPIXELS-1)%2)> 0){
+          seg3_end = (NUMPIXELS/2)-1;
+        } else {
+          seg3_end = NUMPIXELS/2;
+        };
+      break;
+    }
   
+  
+    while (current_seg_number<3){
+      int colorsegmenter = rotary_process();         
+      if (colorsegmenter == -128){seg_mover--;} 
+      if (colorsegmenter == 64){seg_mover++;}    
+  
+      switch(pixelanim){
+        case 1:
+          switch (current_seg_number){
+            case 1:
+              seg_mover = constrain(seg_mover,0,NUMPIXELS-1);
+            break;
+            case 2:
+              seg_mover = constrain(seg_mover,seg1_end+1,NUMPIXELS-1); 
+            break;        
+          }
+    
+        break;
+      
+        case 2:
+          switch (current_seg_number){
+            case 1:
+               seg_mover = constrain(seg_mover,NUMPIXELS/2,NUMPIXELS-1);
+            break;
+            case 2:
+               seg_mover = constrain(seg_mover,seg1_end+1,NUMPIXELS-1);
+            break;        
+          } 
+        break;
+      
+        case 3:
+          switch (current_seg_number){
+            case 1:
+              seg_mover = constrain(seg_mover,0,NUMPIXELS-1);
+            break;
+            case 2: 
+              seg_mover = constrain(seg_mover,0,seg1_end-1); 
+            break;        
+          }
+      
+        break;
+      
+        case 4:
+          switch (current_seg_number){
+            case 1:
+              if (((NUMPIXELS-1)%2)> 0){
+                seg_mover = constrain(seg_mover,0,(NUMPIXELS/2)-2);
+              }else{
+                seg_mover = constrain(seg_mover,0,(NUMPIXELS/2)-1);
+              }
+            break;
+            case 2:
+              if (((NUMPIXELS-1)%2)> 0){
+                seg_mover = constrain(seg_mover,seg1_end+1,(NUMPIXELS/2)-1);
+              }else{
+                seg_mover = constrain(seg_mover,seg1_end+1,NUMPIXELS/2);
+              }
+            break;        
+          } 
+        break;
+      }
+      
+      
       if (digitalRead(button_pin) == LOW){ 
           delay(250);
           current_seg_number++;     
-        } 
-              
-  switch(current_seg_number){
-      case 1:        
-         if (pixelanim == 1){  
-             seg_mover = constrain(seg_mover, 0, (NUMPIXELS-1));
-             seg1_end = seg_mover;     
-             strip.setPixelColor(seg1_end, color1); 
-             for (int x = seg1_end+1; x<NUMPIXELS; x++){
-               strip.setPixelColor(x, strip.Color(0, 0, 0));
-             } 
-         } else if (pixelanim == 3){  
-             seg_mover = constrain(seg_mover, 0, (NUMPIXELS-1));
-             seg1_start = seg_mover;     
-             strip.setPixelColor(seg1_start, color1); 
-             for (int x = seg1_start-1; x>-1; x--){
-               strip.setPixelColor(x, strip.Color(0, 0, 0));
-             }
-         } else if (pixelanim == 2) {
-             seg1_start = ((NUMPIXELS-1)/2);
-              if (((NUMPIXELS-1)%2)> 0){seg1_start=seg1_start+1;}
-             seg_mover = constrain(seg_mover, seg1_start, (NUMPIXELS-1));
-             seg1_end = seg_mover; 
-
-              for (int x = seg1_start; x<seg1_end+1; x++){
-                  strip.setPixelColor(x, color1);
-                }
-              for (int x = seg1_end+1; x<(NUMPIXELS); x++){
-                  strip.setPixelColor(x, strip.Color(0, 0, 0));
-                }
-
-              if (((NUMPIXELS-1)%2)> 0){
-                  for (int x = seg1_start-1; x>seg1_start-(seg1_end-seg1_start)-2; x--){
-                     strip.setPixelColor(x, color1);
-                  }
-                  for (int x = seg1_start-(seg1_end-seg1_start)-2; x>-1; x--){
-                     strip.setPixelColor(x, strip.Color(0, 0, 0));
-                  }
-                if(DEBUG){
-                Serial.println("MoDULo");
-                }
-              } else {
-                  for (int x = seg1_start; x>seg1_start-(seg1_end-seg1_start)-1; x--){
-                     strip.setPixelColor(x, color1);
-                  }
-                  for (int x = seg1_start-(seg1_end-seg1_start)-1; x>-1; x--){
-                     strip.setPixelColor(x, strip.Color(0, 0, 0));
-                  }         
-              }
-         }
-       if(DEBUG){
-           Serial.print("S1end: ");
-           Serial.println(seg1_end);
-           Serial.print("S1start: ");
-           Serial.println(seg1_start);
-       }
-         
-         strip.show();
- 
-     
-      break;
-
-
-
-      case 2:           
-         if (pixelanim == 1){       
-             seg_mover = constrain(seg_mover, seg1_end+1, (NUMPIXELS-1));
-             seg2_end = seg_mover;
-             strip.setPixelColor(seg2_end, color2); 
-             for (int x = seg2_end+1; x<strip.numPixels(); x++){
-               strip.setPixelColor(x, strip.Color(0, 0, 0));
-             }
-         } else if (pixelanim == 3){  
-             seg_mover = constrain(seg_mover, 0, (seg1_start-1));
-             seg2_start = seg_mover;     
-             strip.setPixelColor(seg2_start, color2); 
-             for (int x = seg2_start-1; x>-1; x--){
-               strip.setPixelColor(x, strip.Color(0, 0, 0));
-             }
-         } else if (pixelanim == 2) {
-             //seg1_start = ((NUMPIXELS-1)/2);
-             seg2_start = seg1_end + 1;
-            //  if (((NUMPIXELS-1)%2)> 0){seg1_start=seg1_start+1;}
-             seg_mover = constrain(seg_mover, seg2_start, (NUMPIXELS-1));
-             seg2_end = seg_mover; 
-
-              for (int x = seg2_start; x<seg2_end+1; x++){
-                  strip.setPixelColor(x, color2);
-                }
-              for (int x = seg2_end+1; x<(NUMPIXELS); x++){
-                  strip.setPixelColor(x, strip.Color(0, 0, 0));
-                }
-
-              if (((NUMPIXELS-1)%2)> 0){
-                  for (int x = seg1_start-(seg1_end-seg1_start)-2; x>seg1_start-(seg2_end-seg1_start)-2; x--){
-                     strip.setPixelColor(x, color2);
-                  }
-                  for (int x = seg1_start-(seg2_end-seg1_start)-2; x>-1; x--){
-                     strip.setPixelColor(x, strip.Color(0, 0, 0));
-                  }
-                  if(DEBUG){Serial.println("MoDULo");
-                  }
-              } else {
-                  for (int x = seg1_start-(seg1_end-seg1_start)-1; x>seg1_start-(seg2_end-seg1_start)-1; x--){
-                     strip.setPixelColor(x, color2);
-                  }
-                  for (int x = seg1_start-(seg2_end-seg1_start)-1; x>-1; x--){
-                     strip.setPixelColor(x, strip.Color(0, 0, 0));
-                  }         
-              }
-              
-         }
-
-          if(DEBUG){
-           Serial.print("S2end: ");
-           Serial.println(seg2_end);
-           Serial.print("S2start: ");
-           Serial.println(seg2_start);
-          }
-
-      strip.show();   
-      break;
-
-      case 3:
+      }
+  
+  
+   if (prev_seg_mover != seg_mover){  
+         prev_seg_mover = seg_mover;
+                    
+        switch(current_seg_number){
+            case 1:
+              seg1_end = seg_mover;
+            break;
       
-         if (pixelanim == 1){        
-             seg_mover = constrain(seg_mover, seg2_end+1, (strip.numPixels()-1));
-             seg3_end = seg_mover;
-            // seg3_start = seg2_end +1;
-             strip.setPixelColor(seg3_end, color3); 
-             for (int x = seg3_end+1; x<strip.numPixels(); x++){
-               strip.setPixelColor(x, strip.Color(0, 0, 0));
-             }
-         } else if (pixelanim == 3){  
-             seg_mover = constrain(seg_mover, 0, (seg2_start-1));
-             seg3_start = seg_mover;     
-             strip.setPixelColor(seg3_start, color3); 
-             for (int x = seg3_start-1; x>-1; x--){
-               strip.setPixelColor(x, strip.Color(0, 0, 0));
-             }
-         } else if (pixelanim == 2) {             
-             seg3_start = seg2_end + 1;            
-             seg_mover = constrain(seg_mover, seg3_start, (NUMPIXELS-1));
-             seg3_end = seg_mover; 
-
-              for (int x = seg3_start; x<seg3_end+1; x++){
-                  strip.setPixelColor(x, color3);
-                }
-              for (int x = seg3_end+1; x<(NUMPIXELS); x++){
-                  strip.setPixelColor(x, strip.Color(0, 0, 0));
-                }
-
-              if (((NUMPIXELS-1)%2)> 0){
-                  for (int x = seg1_start-(seg2_end-seg1_start)-2; x>seg1_start-(seg3_end-seg1_start)-2; x--){
-                     strip.setPixelColor(x, color3);
-                  }
-                  for (int x = seg1_start-(seg3_end-seg1_start)-2; x>-1; x--){
-                     strip.setPixelColor(x, strip.Color(0, 0, 0));
-                  }
-                if(DEBUG){
-                Serial.println("MoDULo");
-                }
-              } else {
-                  for (int x = seg1_start-(seg2_end-seg1_start)-1; x>seg1_start-(seg3_end-seg1_start)-1; x--){
-                     strip.setPixelColor(x, color3);
-                  }
-                  for (int x = seg1_start-(seg3_end-seg1_start)-1; x>-1; x--){
-                     strip.setPixelColor(x, strip.Color(0, 0, 0));
-                  }         
-              }          
-         }
-
-          if(DEBUG){
-           Serial.print("S3end: ");
-           Serial.println(seg3_end);
-           Serial.print("S3start: ");
-           Serial.println(seg3_start);
-          }
-      strip.show();
-      break;
-
-
-
-
+            case 2:
+              seg2_end = seg_mover;   
+            break; 
+      
+        }
+        buildarrays();
+        loadallcolors();
+        testlights(4);             
+      }
    }
-  }
 }
+
 
 
 
